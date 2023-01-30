@@ -1,3 +1,4 @@
+import abc
 from abc import ABC
 from typing import List
 
@@ -6,15 +7,23 @@ from utils import log_error
 
 
 class ExprAST(ABC):
-    pass
+    @abc.abstractmethod
+    def codegen(self, builder):
+        pass
 
 
 class ExprIncreasePtr(ExprAST):
+    def codegen(self, builder):
+        pass
+
     def __repr__(self):
         return Token.INC_PTR.value
 
 
 class ExprDecreasePtr(ExprAST):
+
+    def codegen(self, builder):
+        pass
 
     def __repr__(self):
         return Token.DEC_PTR.value
@@ -22,11 +31,17 @@ class ExprDecreasePtr(ExprAST):
 
 class ExprIncreaseValue(ExprAST):
 
+    def codegen(self, builder):
+        pass
+
     def __repr__(self):
         return Token.INC_VAL.value
 
 
 class ExprDecreaseValue(ExprAST):
+
+    def codegen(self, builder):
+        pass
 
     def __repr__(self):
         return Token.DEC_VAL.value
@@ -38,6 +53,9 @@ class ExprBlock(ExprAST):
     def __init__(self, expressions: List[ExprAST]):
         self.expressions = expressions
 
+    def codegen(self, builder):
+        pass
+
     def __repr__(self):
         return str(self.expressions)
 
@@ -45,6 +63,9 @@ class ExprBlock(ExprAST):
 class ExprLoop(ExprAST):
     def __init__(self, block: ExprBlock):
         self.block = block
+
+    def codegen(self, builder):
+        pass
 
     def __repr__(self):
         return '[' + str(self.block) + ']'
@@ -55,8 +76,14 @@ class ExprPrint(ExprAST):
     def __repr__(self):
         return Token.PRINT.value
 
+    def codegen(self, builder):
+        pass
+
 
 class ExprScan(ExprAST):
+
+    def codegen(self, builder):
+        pass
 
     def __repr__(self):
         return Token.SCAN.value
