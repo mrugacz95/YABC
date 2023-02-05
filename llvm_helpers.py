@@ -75,7 +75,8 @@ def run_jit():
     # Run the function via ctypes
     cfunc = CFUNCTYPE(c_int)(func_ptr)
     res = cfunc()
-    print(res)
+    print()
+    print(f"main() = {res}")
 
 
 if __name__ == '__main__':

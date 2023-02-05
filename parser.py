@@ -2,18 +2,21 @@ import abc
 from abc import ABC
 from typing import List
 
+import llvmlite.ir
+from llvmlite import ir
+
 from lexer import Lexer, Token
 from utils import log_error
 
 
 class ExprAST(ABC):
     @abc.abstractmethod
-    def codegen(self, builder):
+    def codegen(self, builder: llvmlite.ir.IRBuilder, mem, ptr, putchar, getchar):
         pass
 
 
 class ExprIncreasePtr(ExprAST):
-    def codegen(self, builder):
+    def codegen(self, builder, mem, ptr, putchar, getchar):
         pass
 
     def __repr__(self):
@@ -22,7 +25,7 @@ class ExprIncreasePtr(ExprAST):
 
 class ExprDecreasePtr(ExprAST):
 
-    def codegen(self, builder):
+    def codegen(self, builder, mem, ptr, putchar, getchar):
         pass
 
     def __repr__(self):
@@ -31,8 +34,11 @@ class ExprDecreasePtr(ExprAST):
 
 class ExprIncreaseValue(ExprAST):
 
-    def codegen(self, builder):
-        pass
+    def codegen(self, builder, mem, ptr, putchar, getchar):
+        ptr_value = builder.load(ptr)
+        value = builder.load(ptr_value)
+        res = builder.add(value, ir.Constant(ir.IntType(32), 1))
+        builder.store(res, ptr_value)
 
     def __repr__(self):
         return Token.INC_VAL.value
@@ -40,7 +46,7 @@ class ExprIncreaseValue(ExprAST):
 
 class ExprDecreaseValue(ExprAST):
 
-    def codegen(self, builder):
+    def codegen(self, builder, mem, ptr, putchar, getchar):
         pass
 
     def __repr__(self):
@@ -53,8 +59,9 @@ class ExprBlock(ExprAST):
     def __init__(self, expressions: List[ExprAST]):
         self.expressions = expressions
 
-    def codegen(self, builder):
-        pass
+    def codegen(self, builder, mem, ptr, putchar, getchar):
+        for expr in self.expressions:
+            expr.codegen(builder, mem, ptr, putchar, getchar)
 
     def __repr__(self):
         return str(self.expressions)
@@ -64,7 +71,7 @@ class ExprLoop(ExprAST):
     def __init__(self, block: ExprBlock):
         self.block = block
 
-    def codegen(self, builder):
+    def codegen(self, builder, mem, ptr, putchar, getchar):
         pass
 
     def __repr__(self):
@@ -76,14 +83,18 @@ class ExprPrint(ExprAST):
     def __repr__(self):
         return Token.PRINT.value
 
-    def codegen(self, builder):
-        pass
+    def codegen(self, builder, mem, ptr, putchar, getchar):
+        ptr_addr = builder.load(ptr)
+        value = builder.load(ptr_addr)
+        builder.call(putchar, (value,))
 
 
 class ExprScan(ExprAST):
 
-    def codegen(self, builder):
-        pass
+    def codegen(self, builder, mem, ptr, putchar, getchar):
+        tmp = builder.call(getchar, ())
+        ptr_addr = builder.load(ptr)
+        builder.store(tmp, ptr_addr)
 
     def __repr__(self):
         return Token.SCAN.value
@@ -92,7 +103,7 @@ class ExprScan(ExprAST):
 class Parser:
     tokens: List[Token]
     current_token: chr
-    tokens_position = 0
+    tokens_position = 1
 
     def __init__(self, tokens: List[Token]):
         self.tokens = tokens
@@ -116,6 +127,8 @@ class Parser:
         expressions: List[ExprAST] = list()
         while True:
             if self.current_token == Token.R_BRACKET:
+                break
+            if self.current_token == Token.EOF:
                 break
             expr = {
                 Token.DEC_PTR: ExprDecreasePtr(),

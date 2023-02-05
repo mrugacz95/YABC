@@ -2,7 +2,6 @@ import argparse
 from ctypes import CFUNCTYPE, c_int
 
 from llvmlite import ir
-from llvmlite.ir import Function
 
 from lexer import Lexer
 from llvm_helpers import compile_ir, create_execution_engine
@@ -19,24 +18,38 @@ def main():
     tokens = Lexer(sourcecode).tokenize()
     ast: ExprBlock = Parser(tokens).parse()
 
-    int = ir.IntType(8)
-    fnty = ir.FunctionType(int, ())
+    int32 = ir.IntType(32)
+    int64 = ir.IntType(64)
+    void_type = ir.VoidType()
 
     module = ir.Module(name="bfk_module")
 
-    func = ir.Function(module, fnty, name="main")
+    # execution variable
+    mem = ir.GlobalVariable(module, ir.ArrayType(ir.IntType(32), 3000), "mem")  # int mem[3000]
+    mem.linkage = "common"
+    mem.initializer = ir.Constant(ir.ArrayType(ir.IntType(32), 3000), None)
+
+    # external functions
+    putchar_type = ir.FunctionType(int32, [int32])
+    putchar = ir.Function(module, putchar_type, name="putchar")
+    getchar_type = ir.FunctionType(int32, [])
+    getchar = ir.Function(module, getchar_type, name="getchar")
+
+    # main function
+    main_type = ir.FunctionType(int32, ())
+    func = ir.Function(module, main_type, name="main")
     block = func.append_basic_block(name="entry")
     builder = ir.IRBuilder(block)
 
-    stackint = builder.alloca(ir.IntType(8))
-    builder.store(ir.Constant(stackint.type.pointee, 123), stackint)
-    acc = builder.load(stackint)
+    # ptr = ir.GlobalVariable(module, ir.PointerType(ir.IntType(32), mem), "ptr")
 
-    ptr_u8 = ir.PointerType(ir.IntType(8))
-    f_u8_u8 = ir.FunctionType(int, (ptr_u8,))
-    puts = ir.Function(module, f_u8_u8, name="puts")
-    builder.call(puts, (stackint,))
-    builder.ret(acc)
+    ptr = builder.alloca(ir.PointerType(int32), name="ptr")
+    builder.store(builder.gep(mem, [ir.Constant(int32, 0), ir.Constant(int32, 0)]), ptr)
+
+    #  generate code
+    ast.codegen(builder, mem, ptr, putchar, getchar)
+
+    builder.ret(ir.Constant(int32, 0))
 
     mod = str(module)
     print(mod)
