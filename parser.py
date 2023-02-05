@@ -17,7 +17,9 @@ class ExprAST(ABC):
 
 class ExprIncreasePtr(ExprAST):
     def codegen(self, builder, mem, ptr, putchar, getchar):
-        pass
+        ptr_addr = builder.load(ptr)
+        new_addr = builder.gep(ptr_addr, [ir.Constant(ir.IntType(32), 1)])
+        builder.store(new_addr, ptr)
 
     def __repr__(self):
         return Token.INC_PTR.value
@@ -26,7 +28,9 @@ class ExprIncreasePtr(ExprAST):
 class ExprDecreasePtr(ExprAST):
 
     def codegen(self, builder, mem, ptr, putchar, getchar):
-        pass
+        ptr_addr = builder.load(ptr)
+        new_addr = builder.gep(ptr_addr, [ir.Constant(ir.IntType(32), -1)])
+        builder.store(new_addr, ptr)
 
     def __repr__(self):
         return Token.DEC_PTR.value
@@ -35,10 +39,10 @@ class ExprDecreasePtr(ExprAST):
 class ExprIncreaseValue(ExprAST):
 
     def codegen(self, builder, mem, ptr, putchar, getchar):
-        ptr_value = builder.load(ptr)
-        value = builder.load(ptr_value)
+        ptr_addr = builder.load(ptr)
+        value = builder.load(ptr_addr)
         res = builder.add(value, ir.Constant(ir.IntType(32), 1))
-        builder.store(res, ptr_value)
+        builder.store(res, ptr_addr)
 
     def __repr__(self):
         return Token.INC_VAL.value
@@ -47,7 +51,10 @@ class ExprIncreaseValue(ExprAST):
 class ExprDecreaseValue(ExprAST):
 
     def codegen(self, builder, mem, ptr, putchar, getchar):
-        pass
+        ptr_addr = builder.load(ptr)
+        value = builder.load(ptr_addr)
+        res = builder.add(value, ir.Constant(ir.IntType(32), -1))
+        builder.store(res, ptr_addr)
 
     def __repr__(self):
         return Token.DEC_VAL.value
