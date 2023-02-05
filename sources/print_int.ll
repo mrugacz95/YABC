@@ -50,8 +50,7 @@ define i32 @main() #0 {
   br label %18, !llvm.loop !6
 
 29:                                               ; preds = %18
-  %30 = load i32, i32* %1, align 4
-  ret i32 %30
+  ret i32 0
 }
 
 declare i32 @getchar() #1

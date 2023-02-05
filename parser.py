@@ -79,7 +79,25 @@ class ExprLoop(ExprAST):
         self.block = block
 
     def codegen(self, builder, mem, ptr, putchar, getchar):
-        pass
+        loop_cond = builder.append_basic_block("loop_cond")
+        loop_block = builder.append_basic_block("loop_block")
+        loop_end = builder.append_basic_block("loop_end")
+
+        # condition
+        cond_builder = ir.IRBuilder(loop_cond)
+        ptr_addr = cond_builder.load(ptr)
+        value = cond_builder.load(ptr_addr)
+        cond = cond_builder.icmp_signed("!=", value, ir.Constant(ir.IntType(32), 0))
+        cond_builder.cbranch(cond, loop_block, loop_end)
+
+        # loop block
+        loop_block = ir.IRBuilder(loop_block)
+        self.block.codegen(loop_block, mem, ptr, putchar, getchar)
+        loop_block.branch(loop_cond)
+
+        # lop end
+        builder.branch(loop_cond)
+        builder.position_at_end(loop_end)
 
     def __repr__(self):
         return '[' + str(self.block) + ']'

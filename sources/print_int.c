@@ -15,4 +15,5 @@ int main(){
         (*p)--;
         putchar(*p);
     }
+    return 0;
 }
