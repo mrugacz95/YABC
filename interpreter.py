@@ -24,7 +24,6 @@ def main():
             open_bracket_pos = stack.pop()
             jump_forward[open_bracket_pos] = program_counter
             jump_backward[program_counter] = open_bracket_pos
-        program_counter += 1
 
     # initialization
     mem = [0] * 3000
