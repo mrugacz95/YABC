@@ -71,7 +71,7 @@ class ExprBlock(ExprAST):
             expr.codegen(builder, mem, ptr, putchar, getchar)
 
     def __repr__(self):
-        return str(self.expressions)
+        return ' '.join([str(expr) for expr in self.expressions])
 
 
 class ExprLoop(ExprAST):
