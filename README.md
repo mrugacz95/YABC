@@ -34,7 +34,7 @@ time python interpreter.py examples/mandelbrot.bf
 |----------|--------------------|-----------------|-------------------------|-------------------|
 | time [s] | 4501.16            | 355,97          | 27,88                   | 3.77              |
 
-[^1]: compiled with -O3 compilation options
+[^1]: compiled with -O3 option
 
 ### Sources
 
