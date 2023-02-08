@@ -30,7 +30,7 @@ Time was measured on mandelbrot implementation.
 time python interpreter.py examples/mandelbrot.bf
 ```
 
-|          | Python interpreter | CPP interpreter | CPP interpreter -O3[^1] | llvmlite compiler |
+|          | Python interpreter | CPP interpreter | CPP interpreter -O3[^1] | llvmlite compilpr |
 |----------|--------------------|-----------------|-------------------------|-------------------|
 | time [s] | 4501.16            | 355,97          | 27,88                   | 3.77              |
 
