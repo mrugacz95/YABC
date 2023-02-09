@@ -13,27 +13,45 @@ class ExprAST(ABC):
     pass
 
 
-class ExprIncreasePtr(ExprAST):
-    def __repr__(self):
-        return Token.INC_PTR.value
+class ExprCumulative(ExprAST):
+    def __init__(self, value=1):
+        self.value = value
 
 
-class ExprDecreasePtr(ExprAST):
+class ExprIncreasePtr(ExprCumulative):
 
-    def __repr__(self):
-        return Token.DEC_PTR.value
-
-
-class ExprIncreaseValue(ExprAST):
+    def __init__(self, value=1):
+        super().__init__(value)
 
     def __repr__(self):
-        return Token.INC_VAL.value
+        return str(self.value) + Token.INC_PTR.value
 
 
-class ExprDecreaseValue(ExprAST):
+class ExprDecreasePtr(ExprCumulative):
+
+    def __init__(self, value=1):
+        super().__init__(value)
 
     def __repr__(self):
-        return Token.DEC_VAL.value
+        return str(self.value) + Token.DEC_PTR.value
+
+
+class ExprIncreaseValue(ExprCumulative):
+
+    def __init__(self, value=1):
+        super().__init__(value)
+
+    def __repr__(self):
+        return str(self.value) + Token.INC_VAL.value
+
+
+class ExprDecreaseValue(ExprCumulative):
+
+    def __init__(self, value=1):
+        super().__init__(value)
+
+    def __repr__(self):
+        return str(self.value) + Token.DEC_VAL.value
 
 
 class ExprBlock(ExprAST):

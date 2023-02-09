@@ -42,11 +42,11 @@ class ASTGenerator:
         pass
 
     @abc.abstractmethod
-    def _visitDecreaseValue(self, builder, expr: ExprDecreaseValue):
+    def _visitIncreaseValue(self, builder, expr: ExprIncreaseValue):
         pass
 
     @abc.abstractmethod
-    def _visitIncreaseValue(self, builder, expr: ExprIncreaseValue):
+    def _visitDecreaseValue(self, builder, expr: ExprDecreaseValue):
         pass
 
     @abc.abstractmethod

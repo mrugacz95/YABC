@@ -22,16 +22,16 @@ class CGenerator(ASTGenerator):
         print("".join(self.builder))
 
     def _visitIncreasePtr(self, builder, expr: ExprIncreasePtr):
-        builder += "p++;"
+        builder += f"p+={expr.value};"
 
     def _visitDecreasePtr(self, builder, expr: ExprDecreasePtr):
-        builder += "p--;"
-
-    def _visitDecreaseValue(self, builder, expr: ExprDecreaseValue):
-        builder += "(*p)--;"
+        builder += f"p-={expr.value};"
 
     def _visitIncreaseValue(self, builder, expr: ExprIncreaseValue):
-        builder += "(*p)++;"
+        builder += f"(*p)+={expr.value};"
+
+    def _visitDecreaseValue(self, builder, expr: ExprDecreaseValue):
+        builder += f"(*p)-={expr.value};"
 
     def _visitLoop(self, builder, expr: ExprLoop):
         builder += "while((*p)!=0){"

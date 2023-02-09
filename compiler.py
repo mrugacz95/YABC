@@ -3,6 +3,7 @@ import argparse
 from generators.c_generator import CGenerator
 from generators.llvm_generator import LLVMGenerator
 from lexer import Lexer
+from optimisers.OperationFuser import OperationFuser
 from parser import Parser, ExprBlock
 
 DEFAULT_CHARSET = "><+-.,[]"
@@ -30,6 +31,8 @@ def main():
 
     tokens = Lexer(sourcecode).tokenize()
     ast: ExprBlock = Parser(tokens).parse()
+
+    OperationFuser().optimise(ast)
 
     # generate code
     generator.generate(ast)

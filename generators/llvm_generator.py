@@ -59,24 +59,24 @@ class LLVMGenerator(ASTGenerator):
 
     def _visitIncreasePtr(self, builder, expr: ExprIncreasePtr):
         ptr_addr = builder.load(self.ptr)
-        new_addr = builder.gep(ptr_addr, [ir.Constant(ir.IntType(32), 1)])
+        new_addr = builder.gep(ptr_addr, [ir.Constant(ir.IntType(32), expr.value)])
         builder.store(new_addr, self.ptr)
 
     def _visitDecreasePtr(self, builder, expr: ExprDecreasePtr):
         ptr_addr = builder.load(self.ptr)
-        new_addr = builder.gep(ptr_addr, [ir.Constant(ir.IntType(32), -1)])
+        new_addr = builder.gep(ptr_addr, [ir.Constant(ir.IntType(32), -expr.value)])
         builder.store(new_addr, self.ptr)
-
-    def _visitDecreaseValue(self, builder, expr: ExprDecreaseValue):
-        ptr_addr = builder.load(self.ptr)
-        value = builder.load(ptr_addr)
-        res = builder.add(value, ir.Constant(ir.IntType(32), -1))
-        builder.store(res, ptr_addr)
 
     def _visitIncreaseValue(self, builder, expr: ExprIncreaseValue):
         ptr_addr = builder.load(self.ptr)
         value = builder.load(ptr_addr)
-        res = builder.add(value, ir.Constant(ir.IntType(32), 1))
+        res = builder.add(value, ir.Constant(ir.IntType(32), expr.value))
+        builder.store(res, ptr_addr)
+
+    def _visitDecreaseValue(self, builder, expr: ExprDecreaseValue):
+        ptr_addr = builder.load(self.ptr)
+        value = builder.load(ptr_addr)
+        res = builder.add(value, ir.Constant(ir.IntType(32), -expr.value))
         builder.store(res, ptr_addr)
 
     def _visitLoop(self, builder, expr: ExprLoop):
