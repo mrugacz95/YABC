@@ -112,6 +112,6 @@ class LLVMGenerator(ASTGenerator):
         value = builder.load(ptr_addr)
         builder.call(self.putchar, (value,))
 
-    def _visitBlock(self, builder, exprBlock: ExprBlock):
-        for expr in exprBlock.expressions:
-            self._visit(builder, expr)
+    def _visitBlock(self, builder, expr: ExprBlock):
+        for inner_expression in expr.expressions:
+            self._visit(builder, inner_expression)
