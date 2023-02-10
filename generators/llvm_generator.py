@@ -1,7 +1,7 @@
 from llvmlite import ir
 from ctypes import CFUNCTYPE, c_int
 from llvm_helpers import create_execution_engine, compile_ir
-from parser import ExprLoop, ExprIncreaseValue, ExprPrint, ExprScan, ExprDecreaseValue, ExprDecreasePtr, \
+from parser import ExprLoop, ExprChangeValue, ExprPrint, ExprScan, ExprDecreasePtr, \
     ExprIncreasePtr, ExprBlock, ExprAST
 from utils import log_error
 from generators.generator import ASTGenerator
@@ -67,16 +67,10 @@ class LLVMGenerator(ASTGenerator):
         new_addr = builder.gep(ptr_addr, [ir.Constant(ir.IntType(32), -expr.value)])
         builder.store(new_addr, self.ptr)
 
-    def _visitIncreaseValue(self, builder, expr: ExprIncreaseValue):
+    def _visitChangeValue(self, builder, expr: ExprChangeValue):
         ptr_addr = builder.load(self.ptr)
         value = builder.load(ptr_addr)
         res = builder.add(value, ir.Constant(ir.IntType(32), expr.value))
-        builder.store(res, ptr_addr)
-
-    def _visitDecreaseValue(self, builder, expr: ExprDecreaseValue):
-        ptr_addr = builder.load(self.ptr)
-        value = builder.load(ptr_addr)
-        res = builder.add(value, ir.Constant(ir.IntType(32), -expr.value))
         builder.store(res, ptr_addr)
 
     def _visitLoop(self, builder, expr: ExprLoop):

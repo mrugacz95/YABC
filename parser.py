@@ -13,45 +13,32 @@ class ExprAST(ABC):
     pass
 
 
-class ExprCumulative(ExprAST):
+class ExprIncreasePtr(ExprAST):
+
     def __init__(self, value=1):
         self.value = value
-
-
-class ExprIncreasePtr(ExprCumulative):
-
-    def __init__(self, value=1):
-        super().__init__(value)
 
     def __repr__(self):
         return str(self.value) + Token.INC_PTR.value
 
 
-class ExprDecreasePtr(ExprCumulative):
+class ExprDecreasePtr(ExprAST):
 
     def __init__(self, value=1):
-        super().__init__(value)
+        self.value = value
 
     def __repr__(self):
         return str(self.value) + Token.DEC_PTR.value
 
 
-class ExprIncreaseValue(ExprCumulative):
+class ExprChangeValue(ExprAST):
 
-    def __init__(self, value=1):
-        super().__init__(value)
-
-    def __repr__(self):
-        return str(self.value) + Token.INC_VAL.value
-
-
-class ExprDecreaseValue(ExprCumulative):
-
-    def __init__(self, value=1):
-        super().__init__(value)
+    def __init__(self, offset=0, value=1):
+        self.value = value
+        self.offset = offset
 
     def __repr__(self):
-        return str(self.value) + Token.DEC_VAL.value
+        return f"[{self.offset}]+={self.value}"
 
 
 class ExprBlock(ExprAST):
@@ -117,8 +104,8 @@ class Parser:
             expr = {
                 Token.DEC_PTR: ExprDecreasePtr(),
                 Token.INC_PTR: ExprIncreasePtr(),
-                Token.INC_VAL: ExprIncreaseValue(),
-                Token.DEC_VAL: ExprDecreaseValue(),
+                Token.INC_VAL: ExprChangeValue(value=1),
+                Token.DEC_VAL: ExprChangeValue(value=-1),
                 Token.PRINT: ExprPrint(),
                 Token.SCAN: ExprScan(),
             }.get(self.current_token)
@@ -139,11 +126,9 @@ class Parser:
         return parsed
 
 
+def test():
+    test_code = Lexer(',++>++++[-<+>].').tokenize()
+    parsed = Parser(test_code).parse()
+    print(parsed)
 if __name__ == '__main__':
-    def test():
-        test_code = Lexer(',++>++++[-<+>].').tokenize()
-        parsed = Parser(test_code).parse()
-        print(parsed)
-
-
     test()

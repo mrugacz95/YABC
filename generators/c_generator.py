@@ -1,10 +1,6 @@
-from llvmlite import ir
-from ctypes import CFUNCTYPE, c_int
-from llvm_helpers import create_execution_engine, compile_ir
-from parser import ExprLoop, ExprIncreaseValue, ExprPrint, ExprScan, ExprDecreaseValue, ExprDecreasePtr, \
-    ExprIncreasePtr, ExprBlock, ExprAST
-from utils import log_error
 from generators.generator import ASTGenerator
+from parser import ExprLoop, ExprPrint, ExprScan, ExprDecreasePtr, \
+    ExprIncreasePtr, ExprBlock, ExprChangeValue
 
 
 class CGenerator(ASTGenerator):
@@ -27,11 +23,12 @@ class CGenerator(ASTGenerator):
     def _visitDecreasePtr(self, builder, expr: ExprDecreasePtr):
         builder += f"p-={expr.value};"
 
-    def _visitIncreaseValue(self, builder, expr: ExprIncreaseValue):
-        builder += f"(*p)+={expr.value};"
-
-    def _visitDecreaseValue(self, builder, expr: ExprDecreaseValue):
-        builder += f"(*p)-={expr.value};"
+    def _visitChangeValue(self, builder, expr: ExprChangeValue):
+        if expr.value >= 0:
+            sign = '+'
+        else:
+            sign = '-'
+        builder += f"p[{expr.offset}]{sign}={abs(expr.value)};"
 
     def _visitLoop(self, builder, expr: ExprLoop):
         builder += "while((*p)!=0){"

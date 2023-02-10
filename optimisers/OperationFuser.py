@@ -2,8 +2,8 @@ from itertools import zip_longest
 from typing import cast
 
 from optimisers.optimiser import Optimiser
-from parser import ExprAST, ExprBlock, ExprIncreasePtr, ExprPrint, ExprCumulative, ExprDecreasePtr, ExprScan, \
-    ExprIncreaseValue, ExprDecreaseValue, ExprLoop
+from parser import ExprAST, ExprBlock, ExprIncreasePtr, ExprPrint, ExprDecreasePtr, ExprScan, \
+    ExprChangeValue, ExprLoop
 
 
 class OperationFuser(Optimiser):
@@ -18,18 +18,42 @@ class OperationFuser(Optimiser):
             changed |= self.optimise(ast.block)
         return changed
 
+    def _can_be_fused(self, expr1, expr2):
+        if isinstance(expr1, ExprDecreasePtr) and isinstance(expr2, ExprDecreasePtr):
+            return True
+        if isinstance(expr1, ExprIncreasePtr) and isinstance(expr2, ExprIncreasePtr):
+            return True
+        if isinstance(expr1, ExprChangeValue) and \
+                isinstance(expr2, ExprChangeValue) and \
+                expr1.offset == expr2.offset:
+            return True
+        return False
+
+    def _fuse_opartions(self, expr, cumulated):
+        if isinstance(expr, ExprDecreasePtr):
+            expr.value += cumulated
+            return expr
+        if isinstance(expr, ExprIncreasePtr):
+            expr.value += cumulated
+            return expr
+        if isinstance(expr, ExprChangeValue):
+            expr.value += cumulated
+            return expr
+        raise RuntimeError("Operation can't be fused")
+
     def _optimiseBlock(self, expr: ExprBlock) -> bool:
         optimised = []
         cumulated = 0
         changed = False
-        for i, j in zip_longest(expr.expressions, expr.expressions[1:]):
-            if isinstance(i, ExprCumulative) and type(i) is type(j):
-                cumulated += i.value
+        for expr1, expr2 in zip_longest(expr.expressions, expr.expressions[1:]):
+            if self._can_be_fused(expr1, expr2):
+                cumulated += expr1.value
             else:
-                if cumulated > 0:
-                    cast(ExprCumulative, i).value += cumulated
+                if cumulated != 0:
+                    optimised.append(self._fuse_opartions(expr1, cumulated))
                     changed = True
-                optimised.append(i)
+                else:
+                    optimised.append(expr1)
                 cumulated = 0
         expr.expressions = optimised
         return changed
@@ -37,22 +61,36 @@ class OperationFuser(Optimiser):
 
 def test():
     optimiser = OperationFuser()
-    ast = ExprBlock([ExprIncreasePtr(), ExprIncreasePtr(), ExprIncreasePtr(),
-                     ExprDecreasePtr(), ExprDecreasePtr(3),
-                     ExprPrint(), ExprIncreasePtr(), ExprIncreasePtr(),
-                     ExprIncreaseValue(), ExprIncreaseValue(), ExprIncreaseValue(), ExprIncreaseValue(),
-                     ExprScan(),
-                     ExprLoop(
-                         ExprBlock([
-                             ExprPrint(),
-                             ExprIncreaseValue(), ExprIncreaseValue(2), ExprIncreaseValue(),
-                             ExprIncreasePtr(), ExprIncreasePtr(),
-                         ])
-                     ),
-                     ExprDecreaseValue(), ExprDecreaseValue(), ExprDecreaseValue(), ])
+    ast = ExprBlock(
+        [ExprIncreasePtr(), ExprIncreasePtr(), ExprIncreasePtr(),
+         ExprDecreasePtr(), ExprDecreasePtr(3),
+         ExprPrint(),
+         ExprIncreasePtr(), ExprIncreasePtr(),
+         ExprChangeValue(offset=1, value=1), ExprChangeValue(offset=1, value=1), ExprChangeValue(offset=1, value=1),
+         ExprChangeValue(offset=2, value=1),
+         ExprChangeValue(offset=1, value=1),
+         ExprChangeValue(value=1), ExprChangeValue(value=1), ExprChangeValue(value=1),
+         ExprScan(),
+         ExprLoop(
+             ExprBlock([
+                 ExprPrint(),
+                 ExprChangeValue(value=1), ExprChangeValue(value=2), ExprChangeValue(value=1),
+                 ExprIncreasePtr(), ExprIncreasePtr(),
+             ])
+         ),
+         ExprChangeValue(value=-1), ExprChangeValue(value=-1), ExprChangeValue(value=-1), ])
+    changed = optimiser.optimise(ast)
+    print(ast, changed)
+
+
+def test2():
+    optimiser = OperationFuser()
+    ast = ExprBlock([
+        ExprChangeValue(value=-1), ExprChangeValue(value=-1), ExprChangeValue(value=-1),
+    ])
     changed = optimiser.optimise(ast)
     print(ast, changed)
 
 
 if __name__ == '__main__':
-    test()
+    test2()
