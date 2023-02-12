@@ -1,7 +1,6 @@
 import abc
 
-from parser import ExprLoop, ExprBlock, ExprScan, ExprPrint, ExprDecreasePtr, \
-    ExprIncreasePtr, ExprAST, ExprChangeValue
+from parser import ExprLoop, ExprBlock, ExprScan, ExprPrint, ExprChangePtr, ExprAST, ExprChangeValue
 
 
 class ASTGenerator:
@@ -16,10 +15,8 @@ class ASTGenerator:
     def _visit(self, builder, expr: ExprAST):
         if isinstance(expr, ExprBlock):
             self._visitBlock(builder, expr)
-        elif isinstance(expr, ExprIncreasePtr):
-            self._visitIncreasePtr(builder, expr)
-        elif isinstance(expr, ExprDecreasePtr):
-            self._visitDecreasePtr(builder, expr)
+        elif isinstance(expr, ExprChangePtr):
+            self._visitChangePtr(builder, expr)
         elif isinstance(expr, ExprChangeValue):
             self._visitChangeValue(builder, expr)
         elif isinstance(expr, ExprLoop):
@@ -32,11 +29,7 @@ class ASTGenerator:
             raise RuntimeError(f"Unknown expression {expr}")
 
     @abc.abstractmethod
-    def _visitIncreasePtr(self, builder, expr: ExprIncreasePtr):
-        pass
-
-    @abc.abstractmethod
-    def _visitDecreasePtr(self, builder, expr: ExprDecreasePtr):
+    def _visitChangePtr(self, builder, expr: ExprChangePtr):
         pass
 
     @abc.abstractmethod

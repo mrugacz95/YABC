@@ -1,6 +1,5 @@
 from generators.generator import ASTGenerator
-from parser import ExprLoop, ExprPrint, ExprScan, ExprDecreasePtr, \
-    ExprIncreasePtr, ExprBlock, ExprChangeValue
+from parser import ExprLoop, ExprPrint, ExprScan, ExprChangePtr, ExprBlock, ExprChangeValue
 
 
 class CGenerator(ASTGenerator):
@@ -17,11 +16,12 @@ class CGenerator(ASTGenerator):
     def run(self):
         print("".join(self.builder))
 
-    def _visitIncreasePtr(self, builder, expr: ExprIncreasePtr):
-        builder += f"p+={expr.value};"
-
-    def _visitDecreasePtr(self, builder, expr: ExprDecreasePtr):
-        builder += f"p-={expr.value};"
+    def _visitChangePtr(self, builder, expr: ExprChangePtr):
+        if expr.offset >= 0:
+            sign = '+'
+        else:
+            sign = '-'
+        builder += f"p{sign}={abs(expr.offset)};"
 
     def _visitChangeValue(self, builder, expr: ExprChangeValue):
         if expr.value >= 0:

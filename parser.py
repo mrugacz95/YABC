@@ -13,22 +13,17 @@ class ExprAST(ABC):
     pass
 
 
-class ExprIncreasePtr(ExprAST):
+class ExprChangePtr(ExprAST):
 
-    def __init__(self, value=1):
-        self.value = value
-
-    def __repr__(self):
-        return str(self.value) + Token.INC_PTR.value
-
-
-class ExprDecreasePtr(ExprAST):
-
-    def __init__(self, value=1):
-        self.value = value
+    def __init__(self, offset):
+        self.offset = offset
 
     def __repr__(self):
-        return str(self.value) + Token.DEC_PTR.value
+        if self.offset >= 0:
+            sign = Token.INC_PTR.value
+        else:
+            sign = Token.DEC_PTR.value
+        return str(self.offset) + sign
 
 
 class ExprChangeValue(ExprAST):
@@ -102,8 +97,8 @@ class Parser:
             if self.current_token == Token.EOF:
                 break
             expr = {
-                Token.DEC_PTR: ExprDecreasePtr(),
-                Token.INC_PTR: ExprIncreasePtr(),
+                Token.DEC_PTR: ExprChangePtr(-1),
+                Token.INC_PTR: ExprChangePtr(1),
                 Token.INC_VAL: ExprChangeValue(value=1),
                 Token.DEC_VAL: ExprChangeValue(value=-1),
                 Token.PRINT: ExprPrint(),
@@ -130,5 +125,7 @@ def test():
     test_code = Lexer(',++>++++[-<+>].').tokenize()
     parsed = Parser(test_code).parse()
     print(parsed)
+
+
 if __name__ == '__main__':
     test()

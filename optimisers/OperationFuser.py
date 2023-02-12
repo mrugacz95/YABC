@@ -2,7 +2,7 @@ from itertools import zip_longest
 from typing import cast
 
 from optimisers.optimiser import Optimiser
-from parser import ExprAST, ExprBlock, ExprIncreasePtr, ExprPrint, ExprDecreasePtr, ExprScan, \
+from parser import ExprAST, ExprBlock, ExprChangePtr, ExprPrint, ExprScan, \
     ExprChangeValue, ExprLoop
 
 
@@ -19,9 +19,7 @@ class OperationFuser(Optimiser):
         return changed
 
     def _can_be_fused(self, expr1, expr2):
-        if isinstance(expr1, ExprDecreasePtr) and isinstance(expr2, ExprDecreasePtr):
-            return True
-        if isinstance(expr1, ExprIncreasePtr) and isinstance(expr2, ExprIncreasePtr):
+        if isinstance(expr1, ExprChangeValue) and isinstance(expr2, ExprChangeValue):
             return True
         if isinstance(expr1, ExprChangeValue) and \
                 isinstance(expr2, ExprChangeValue) and \
@@ -30,11 +28,8 @@ class OperationFuser(Optimiser):
         return False
 
     def _fuse_opartions(self, expr, cumulated):
-        if isinstance(expr, ExprDecreasePtr):
-            expr.value += cumulated
-            return expr
-        if isinstance(expr, ExprIncreasePtr):
-            expr.value += cumulated
+        if isinstance(expr, ExprChangePtr):
+            expr.offset += cumulated
             return expr
         if isinstance(expr, ExprChangeValue):
             expr.value += cumulated
@@ -62,10 +57,10 @@ class OperationFuser(Optimiser):
 def test():
     optimiser = OperationFuser()
     ast = ExprBlock(
-        [ExprIncreasePtr(), ExprIncreasePtr(), ExprIncreasePtr(),
-         ExprDecreasePtr(), ExprDecreasePtr(3),
+        [ExprChangePtr(1), ExprChangePtr(1), ExprChangePtr(1),
+         ExprChangePtr(-1), ExprChangePtr(-3),
          ExprPrint(),
-         ExprIncreasePtr(), ExprIncreasePtr(),
+         ExprChangePtr(1), ExprChangePtr(1),
          ExprChangeValue(offset=1, value=1), ExprChangeValue(offset=1, value=1), ExprChangeValue(offset=1, value=1),
          ExprChangeValue(offset=2, value=1),
          ExprChangeValue(offset=1, value=1),
@@ -75,7 +70,7 @@ def test():
              ExprBlock([
                  ExprPrint(),
                  ExprChangeValue(value=1), ExprChangeValue(value=2), ExprChangeValue(value=1),
-                 ExprIncreasePtr(), ExprIncreasePtr(),
+                 ExprChangePtr(1), ExprChangePtr(1),
              ])
          ),
          ExprChangeValue(value=-1), ExprChangeValue(value=-1), ExprChangeValue(value=-1), ])
