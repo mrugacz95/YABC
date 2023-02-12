@@ -3,6 +3,7 @@ import argparse
 from generators.c_generator import CGenerator
 from generators.llvm_generator import LLVMGenerator
 from lexer import Lexer
+from optimisers.OffsetFuser import OffsetFuser
 from optimisers.OperationFuser import OperationFuser
 from parser import Parser, ExprBlock
 
@@ -33,6 +34,7 @@ def main():
     ast: ExprBlock = Parser(tokens).parse()
 
     OperationFuser().optimise(ast)
+    OffsetFuser().optimise(ast)
 
     # generate code
     generator.generate(ast)

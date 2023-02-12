@@ -59,14 +59,19 @@ class LLVMGenerator(ASTGenerator):
 
     def _visitChangePtr(self, builder, expr: ExprChangePtr):
         ptr_addr = builder.load(self.ptr)
-        new_addr = builder.gep(ptr_addr, [ir.Constant(ir.IntType(32), expr.offset)])
-        builder.store(new_addr, self.ptr)
+        offset_addr = builder.gep(ptr_addr, [ir.Constant(ir.IntType(32), expr.offset)])
+        builder.store(offset_addr, self.ptr)
 
     def _visitChangeValue(self, builder, expr: ExprChangeValue):
         ptr_addr = builder.load(self.ptr)
-        value = builder.load(ptr_addr)
+        if expr.offset == 0:
+            offset_addr = ptr_addr
+            value = builder.load(ptr_addr)
+        else:
+            offset_addr = builder.gep(ptr_addr, [ir.Constant(ir.IntType(32), expr.offset)])
+            value = builder.load(offset_addr)
         res = builder.add(value, ir.Constant(ir.IntType(32), expr.value))
-        builder.store(res, ptr_addr)
+        builder.store(res, offset_addr)
 
     def _visitLoop(self, builder, expr: ExprLoop):
         loop_cond = builder.append_basic_block("loop_cond")

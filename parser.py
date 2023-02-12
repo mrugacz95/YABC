@@ -33,7 +33,11 @@ class ExprChangeValue(ExprAST):
         self.offset = offset
 
     def __repr__(self):
-        return f"[{self.offset}]+={self.value}"
+        if self.value >= 0:
+            sign = '+'
+        else:
+            sign = '-'
+        return f"[{self.offset}]{sign}={abs(self.value)}"
 
 
 class ExprBlock(ExprAST):

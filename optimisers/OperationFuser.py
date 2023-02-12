@@ -1,5 +1,4 @@
 from itertools import zip_longest
-from typing import cast
 
 from optimisers.optimiser import Optimiser
 from parser import ExprAST, ExprBlock, ExprChangePtr, ExprPrint, ExprScan, \
@@ -19,13 +18,14 @@ class OperationFuser(Optimiser):
         return changed
 
     def _can_be_fused(self, expr1, expr2):
-        if isinstance(expr1, ExprChangeValue) and isinstance(expr2, ExprChangeValue):
-            return True
         if isinstance(expr1, ExprChangeValue) and \
-                isinstance(expr2, ExprChangeValue) and \
+                isinstance(expr2, ExprChangeValue):
+            return expr2.value
+        if isinstance(expr1, ExprChangePtr) and \
+                isinstance(expr2, ExprChangePtr) and \
                 expr1.offset == expr2.offset:
-            return True
-        return False
+            return expr1.offset
+        return None
 
     def _fuse_opartions(self, expr, cumulated):
         if isinstance(expr, ExprChangePtr):
@@ -41,8 +41,9 @@ class OperationFuser(Optimiser):
         cumulated = 0
         changed = False
         for expr1, expr2 in zip_longest(expr.expressions, expr.expressions[1:]):
-            if self._can_be_fused(expr1, expr2):
-                cumulated += expr1.value
+            fused_value = self._can_be_fused(expr1, expr2)
+            if fused_value is not  None:
+                cumulated += fused_value
             else:
                 if cumulated != 0:
                     optimised.append(self._fuse_opartions(expr1, cumulated))
