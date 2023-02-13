@@ -21,6 +21,11 @@ class ExprChangePtr(ExprAST):
             sign = Token.DEC_PTR.value
         return str(self.offset) + sign
 
+    def __eq__(self, other):
+        if isinstance(self, other.__class__):
+            return self.offset == other.offset
+        return False
+
 
 class ExprChangeValue(ExprAST):
 
@@ -35,6 +40,12 @@ class ExprChangeValue(ExprAST):
             sign = '-'
         return f"[{self.offset}]{sign}={abs(self.value)}"
 
+    def __eq__(self, other):
+        if isinstance(self, other.__class__):
+            return self.offset == other.offset and \
+                self.value == other.value
+        return False
+
 
 class ExprBlock(ExprAST):
     expressions = List[ExprAST]
@@ -45,6 +56,11 @@ class ExprBlock(ExprAST):
     def __repr__(self):
         return ' '.join([str(expr) for expr in self.expressions])
 
+    def __eq__(self, other):
+        if isinstance(self, other.__class__):
+            return self.expressions == other.expressions
+        return False
+
 
 class ExprLoop(ExprAST):
     def __init__(self, block: ExprBlock):
@@ -53,17 +69,28 @@ class ExprLoop(ExprAST):
     def __repr__(self):
         return '[' + str(self.block) + ']'
 
+    def __eq__(self, other):
+        if isinstance(self, other.__class__):
+            return self.block == other.block
+        return False
+
 
 class ExprPrint(ExprAST):
 
     def __repr__(self):
         return Token.PRINT.value
 
+    def __eq__(self, other):
+        return isinstance(self, other.__class__)
+
 
 class ExprScan(ExprAST):
 
     def __repr__(self):
         return Token.SCAN.value
+
+    def __eq__(self, other):
+        return isinstance(self, other.__class__)
 
 
 class Parser:
@@ -119,13 +146,3 @@ class Parser:
         if self.current_token != Token.EOF:
             log_error("Something went wrong")
         return parsed
-
-
-def test():
-    test_code = Lexer(',++>++++[-<+>].').tokenize()
-    parsed = Parser(test_code).parse()
-    print(parsed)
-
-
-if __name__ == '__main__':
-    test()

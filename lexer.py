@@ -37,9 +37,3 @@ class Lexer:
             log_error("Some closing brackets are missing.")
         tokenized.append(Token.EOF)
         return tokenized
-
-
-if __name__ == '__main__':
-    test_code = ',++>++++[-<+>].'
-    tokenized = Lexer(test_code).tokenize()
-    print(tokenized)
