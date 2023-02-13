@@ -1,1 +1,3 @@
 llvmlite
+flake8
+pylint

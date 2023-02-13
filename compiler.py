@@ -1,10 +1,12 @@
 import argparse
+from typing import List
 
 from generators.c_generator import CGenerator
 from generators.llvm_generator import LLVMGenerator
 from lexer import Lexer
 from optimisers.OffsetFuser import OffsetFuser
 from optimisers.OperationFuser import OperationFuser
+from optimisers.optimiser import Optimiser
 from parser import Parser, ExprBlock
 
 DEFAULT_CHARSET = "><+-.,[]"
@@ -16,7 +18,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("sourcefile")
     parser.add_argument("--charset", default=DEFAULT_CHARSET, required=False)
-    parser.add_argument("--generator", default=LLVM_GENERATOR, required=False, choices=[C_GENERATOR, LLVM_GENERATOR])
+    parser.add_argument("--generator", default=LLVM_GENERATOR, required=False,
+                        choices=[C_GENERATOR, LLVM_GENERATOR])
     args = parser.parse_args()
     if args.generator == C_GENERATOR:
         generator = CGenerator()

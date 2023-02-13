@@ -40,9 +40,10 @@ class OperationFuser(Optimiser):
         optimised = []
         cumulated = 0
         changed = False
-        for expr1, expr2 in zip_longest(expr.expressions, expr.expressions[1:]):
+        for expr1, expr2 in zip_longest(expr.expressions,
+                                        expr.expressions[1:]):
             fused_value = self._can_be_fused(expr1, expr2)
-            if fused_value is not  None:
+            if fused_value is not None:
                 cumulated += fused_value
             else:
                 if cumulated != 0:
@@ -62,19 +63,24 @@ def test():
          ExprChangePtr(-1), ExprChangePtr(-3),
          ExprPrint(),
          ExprChangePtr(1), ExprChangePtr(1),
-         ExprChangeValue(offset=1, value=1), ExprChangeValue(offset=1, value=1), ExprChangeValue(offset=1, value=1),
+         ExprChangeValue(offset=1, value=1),
+         ExprChangeValue(offset=1, value=1),
+         ExprChangeValue(offset=1, value=1),
          ExprChangeValue(offset=2, value=1),
          ExprChangeValue(offset=1, value=1),
-         ExprChangeValue(value=1), ExprChangeValue(value=1), ExprChangeValue(value=1),
+         ExprChangeValue(value=1), ExprChangeValue(value=1),
+         ExprChangeValue(value=1),
          ExprScan(),
          ExprLoop(
              ExprBlock([
                  ExprPrint(),
-                 ExprChangeValue(value=1), ExprChangeValue(value=2), ExprChangeValue(value=1),
+                 ExprChangeValue(value=1), ExprChangeValue(value=2),
+                 ExprChangeValue(value=1),
                  ExprChangePtr(1), ExprChangePtr(1),
              ])
          ),
-         ExprChangeValue(value=-1), ExprChangeValue(value=-1), ExprChangeValue(value=-1), ])
+         ExprChangeValue(value=-1), ExprChangeValue(value=-1),
+         ExprChangeValue(value=-1), ])
     changed = optimiser.optimise(ast)
     print(ast, changed)
 
@@ -82,7 +88,8 @@ def test():
 def test2():
     optimiser = OperationFuser()
     ast = ExprBlock([
-        ExprChangeValue(value=-1), ExprChangeValue(value=-1), ExprChangeValue(value=-1),
+        ExprChangeValue(value=-1), ExprChangeValue(value=-1),
+        ExprChangeValue(value=-1),
     ])
     changed = optimiser.optimise(ast)
     print(ast, changed)

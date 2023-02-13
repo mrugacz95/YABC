@@ -15,9 +15,12 @@ class LLVMGenerator(ASTGenerator):
         self.module = ir.Module(name="bfk_module")
 
         # execution variable
-        self.mem = ir.GlobalVariable(self.module, ir.ArrayType(self.int32, 3000), "mem")  # int mem[3000]
+        self.mem = ir.GlobalVariable(self.module,
+                                     ir.ArrayType(self.int32, 3000),
+                                     "mem")  # int mem[3000]
         self.mem.linkage = "common"
-        self.mem.initializer = ir.Constant(ir.ArrayType(self.int32, 3000), None)
+        self.mem.initializer = ir.Constant(ir.ArrayType(self.int32, 3000),
+                                           None)
 
         # external functions
         putchar_type = ir.FunctionType(self.int32, [self.int32])
@@ -33,7 +36,9 @@ class LLVMGenerator(ASTGenerator):
 
         # init mem pointer
         self.ptr = self.builder.alloca(ir.PointerType(self.int32), name="ptr")
-        self.builder.store(self.builder.gep(self.mem, [ir.Constant(self.int32, 0), ir.Constant(self.int32, 0)]),
+        self.builder.store(self.builder.gep(self.mem,
+                                            [ir.Constant(self.int32, 0),
+                                             ir.Constant(self.int32, 0)]),
                            self.ptr)
 
     def generate(self, ast: ExprAST):
@@ -59,7 +64,8 @@ class LLVMGenerator(ASTGenerator):
 
     def _visitChangePtr(self, builder, expr: ExprChangePtr):
         ptr_addr = builder.load(self.ptr)
-        offset_addr = builder.gep(ptr_addr, [ir.Constant(ir.IntType(32), expr.offset)])
+        offset_addr = builder.gep(ptr_addr,
+                                  [ir.Constant(ir.IntType(32), expr.offset)])
         builder.store(offset_addr, self.ptr)
 
     def _visitChangeValue(self, builder, expr: ExprChangeValue):
@@ -68,7 +74,8 @@ class LLVMGenerator(ASTGenerator):
             offset_addr = ptr_addr
             value = builder.load(ptr_addr)
         else:
-            offset_addr = builder.gep(ptr_addr, [ir.Constant(ir.IntType(32), expr.offset)])
+            offset_addr = builder.gep(ptr_addr, [
+                ir.Constant(ir.IntType(32), expr.offset)])
             value = builder.load(offset_addr)
         res = builder.add(value, ir.Constant(ir.IntType(32), expr.value))
         builder.store(res, offset_addr)
@@ -82,7 +89,8 @@ class LLVMGenerator(ASTGenerator):
         cond_builder = ir.IRBuilder(loop_cond)
         ptr_addr = cond_builder.load(self.ptr)
         value = cond_builder.load(ptr_addr)
-        cond = cond_builder.icmp_signed("!=", value, ir.Constant(ir.IntType(32), 0))
+        cond = cond_builder.icmp_signed("!=", value,
+                                        ir.Constant(ir.IntType(32), 0))
         cond_builder.cbranch(cond, loop_builder, loop_end)
 
         # loop block

@@ -1,5 +1,6 @@
 from optimisers.optimiser import Optimiser
-from parser import ExprAST, ExprBlock, ExprLoop, ExprChangePtr, ExprChangeValue, ExprPrint, ExprScan
+from parser import ExprAST, ExprBlock, ExprLoop, ExprChangePtr, \
+    ExprChangeValue, ExprPrint
 from utils import window
 
 
@@ -17,7 +18,8 @@ class OffsetFuser(Optimiser):
     def _optimiseBlock(self, block: ExprBlock):
         changed = False
         optimised = []
-        triples = list(window(block.expressions + [None, None], 3))  # todo change None to EmptyOperation
+        triples = list(window(block.expressions + [None, None],
+                              3))  # todo change None to EmptyOperation
         i = 0
         while i < len(triples):
             (prev, mid, next) = triples[i]
@@ -25,7 +27,9 @@ class OffsetFuser(Optimiser):
                     isinstance(mid, ExprChangeValue) and \
                     isinstance(next, ExprChangePtr) and \
                     prev.offset == -next.offset:
-                optimised.append(ExprChangeValue(offset=prev.offset + mid.offset, value=mid.value))
+                optimised.append(
+                    ExprChangeValue(offset=prev.offset + mid.offset,
+                                    value=mid.value))
                 i += 3
                 changed = True
             else:

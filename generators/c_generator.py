@@ -1,5 +1,6 @@
 from generators.generator import ASTGenerator
-from parser import ExprLoop, ExprPrint, ExprScan, ExprChangePtr, ExprBlock, ExprChangeValue
+from parser import ExprLoop, ExprPrint, ExprScan, ExprChangePtr, ExprBlock, \
+    ExprChangeValue
 
 
 class CGenerator(ASTGenerator):

@@ -1,9 +1,5 @@
-import abc
 from abc import ABC
 from typing import List
-
-import llvmlite.ir
-from llvmlite import ir
 
 from lexer import Lexer, Token
 from utils import log_error

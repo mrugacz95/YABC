@@ -1,6 +1,7 @@
 import abc
 
-from parser import ExprLoop, ExprBlock, ExprScan, ExprPrint, ExprChangePtr, ExprAST, ExprChangeValue
+from parser import ExprLoop, ExprBlock, ExprScan, ExprPrint, ExprChangePtr, \
+    ExprAST, ExprChangeValue
 
 
 class ASTGenerator:

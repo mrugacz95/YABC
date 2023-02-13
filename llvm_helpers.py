@@ -20,7 +20,7 @@ llvm_ir = """
      %"res" = fadd double %".1", %".2"
      ret double %"res"
    }
-   
+
    ; hello-world.ll
 
     @string = private constant [15 x i8] c"Hello, world!\\0A\\00"
@@ -31,7 +31,7 @@ llvm_ir = """
         %address = getelementptr [15 x i8], [15 x i8]* @string, i64 0, i64 0
         call i32 @puts(i8* %address)
         ret i32 0
-    }   
+    }
    """
 
 
@@ -67,7 +67,7 @@ def compile_ir(engine, llvm_ir):
 
 def run_jit():
     engine = create_execution_engine()
-    mod = compile_ir(engine, llvm_ir)
+    compile_ir(engine, llvm_ir)
 
     # Look up the function pointer (a Python int)
     func_ptr = engine.get_function_address("main")
